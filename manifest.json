@@ -1,0 +1,19 @@
+{
+  "name": "Add CSS to Block Elements",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "description": "A Chrome extension that adds a CSS attribute to all block elements on the page when clicked.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "star.png"
+    },
+    "default_title": "Apply CSS"
+  }
+}
