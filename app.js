@@ -1,8 +1,8 @@
-document.addEventListener("DOMContentLoaded", function (e) {
+document.addEventListener("DOMContentLoaded", e => {
   const addHORLineBtn = document.getElementById("addHLine");
   const addVERLineBtn = document.getElementById("addVLine");
   const deleteLinesBtn = document.getElementById("deleteLines");
-  const addRulerBtn = document.querySelector("#addRuler");
+  const addRulerBtn = document.getElementById("addRuler");
 
   addHORLineBtn.addEventListener("click", () => {
     chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
             function moveLine(e) {
               mousePosition = e.clientY;
-              horizontalLine.style.top = `${mousePosition - 10}px`;
+              horizontalLine.style.top = `${mousePosition}px`;
               document.body.style.cursor = "move";
             }
 
@@ -40,6 +40,17 @@ document.addEventListener("DOMContentLoaded", function (e) {
                 document.body.style.cursor = "default";
               }
             })
+
+            document.addEventListener('keydown', function (event) {
+              if (event.key === 'Escape' || event.key === 'Esc') {
+                const allHLines = document.querySelectorAll(".horizontal-line");
+                const allVLines = document.querySelectorAll(".vertical-line");
+                const allLines = [...allHLines, ...allVLines];
+                allLines.forEach(element => {
+                  element.remove();
+                });
+              }
+            });
           },
         }
       );
@@ -114,71 +125,120 @@ document.addEventListener("DOMContentLoaded", function (e) {
         {
           target: { tabId: tabId },
           function: () => {
-            const verticalLineOne = document.createElement("span");
-            verticalLineOne.style.width = '1px';
-            verticalLineOne.style.height = '100vh';
-            verticalLineOne.style.backgroundColor = 'black';
-            verticalLineOne.style.zIndex = '9999';
-            verticalLineOne.style.position = 'fixed';
-            verticalLineOne.style.top = '0';
-            verticalLineOne.style.left = '40%';
-            verticalLineOne.style.cursor = 'move';
-            verticalLineOne.setAttribute("id", "vertical-line-one")
-            verticalLineOne.setAttribute("class", "ver-ruler-line")
-            document.body.appendChild(verticalLineOne);
+            function createLine(type, id, position, className) {
+              const line = document.createElement("span");
+              line.style.backgroundColor = 'black';
+              line.style.zIndex = '9999';
+              line.style.position = 'fixed';
+              line.style.cursor = 'move';
+              line.setAttribute("id", id);
+              line.setAttribute("class", className);
 
-            const verticalLineTwo = document.createElement("span");
-            verticalLineTwo.style.width = '1px';
-            verticalLineTwo.style.height = '100vh';
-            verticalLineTwo.style.backgroundColor = 'black';
-            verticalLineTwo.style.zIndex = '9999';
-            verticalLineTwo.style.position = 'fixed';
-            verticalLineTwo.style.top = '0';
-            verticalLineTwo.style.left = '60%';
-            verticalLineTwo.style.cursor = 'move';
-            verticalLineTwo.setAttribute("id", "vertical-line-two")
-            verticalLineTwo.setAttribute("class", "ver-ruler-line")
-            document.body.appendChild(verticalLineTwo);
+              if (type === 'vertical') {
+                line.style.width = '1px';
+                line.style.height = '100vh';
+                line.style.top = '0';
+                line.style.left = position;
+              } else if (type === 'horizontal') {
+                line.style.width = '100vw';
+                line.style.height = '1px';
+                line.style.top = position;
+                line.style.left = '0';
+              }
 
-            const horizontalLineOne = document.createElement("span");
-            horizontalLineOne.style.width = '100vw';
-            horizontalLineOne.style.height = '1px';
-            horizontalLineOne.style.backgroundColor = 'black';
-            horizontalLineOne.style.zIndex = '9999';
-            horizontalLineOne.style.position = 'fixed';
-            horizontalLineOne.style.top = '40%';
-            horizontalLineOne.style.left = '0';
-            horizontalLineOne.style.cursor = 'move';
-            horizontalLineOne.setAttribute("id", "horizontal-line-one")
-            horizontalLineOne.setAttribute("class", "hor-ruler-line")
-            document.body.appendChild(horizontalLineOne);
+              document.body.appendChild(line);
+            }
 
-            const horizontalLineTwo = document.createElement("span");
-            horizontalLineTwo.style.width = '100vw';
-            horizontalLineTwo.style.height = '1px';
-            horizontalLineTwo.style.backgroundColor = 'black';
-            horizontalLineTwo.style.zIndex = '9999';
-            horizontalLineTwo.style.position = 'fixed';
-            horizontalLineTwo.style.top = '60%';
-            horizontalLineTwo.style.left = '0';
-            horizontalLineTwo.style.cursor = 'move';
-            horizontalLineTwo.setAttribute("id", "horizontal-line-two")
-            horizontalLineTwo.setAttribute("class", "hor-ruler-line")
-            document.body.appendChild(horizontalLineTwo);
+            createLine('vertical', 'vertical-line-one', '40%', 'ver-ruler-line');
+            createLine('vertical', 'vertical-line-two', '60%', 'ver-ruler-line');
+            createLine('horizontal', 'horizontal-line-one', '40%', 'hor-ruler-line');
+            createLine('horizontal', 'horizontal-line-two', '60%', 'hor-ruler-line');
 
-            const showHeight = () => {
-              const lines = document.querySelectorAll(".hor-ruler-line")
-              let lineOneFromTop = lines[0].getBoundingClientRect().top.toFixed(0)
-              let lineTwoFromTop = lines[1].getBoundingClientRect().top.toFixed(0)
+            let isHorLineOneClicked = false;
+            let isHorLineTwoClicked = false;
+            let isVerLineOneClicked = false;
+            let isVerLineTwoClicked = false;
+            let mousePositionX;
+            let mousePositionY;
+            const horLines = document.querySelectorAll(".hor-ruler-line");
+            const verLines = document.querySelectorAll(".ver-ruler-line");
+
+            function moveLineOneY(e) {
+              mousePositionY = e.clientY;
+              e.currentTarget.getElementById('horizontal-line-one').style.top = `${mousePositionY}px`
+            }
+
+            function moveLineTwoY(e) {
+              mousePositionY = e.clientY;
+              e.currentTarget.getElementById('horizontal-line-two').style.top = `${mousePositionY}px`
+            }
+
+            // function observeMousePosition(e) {
+            //   mousePositionX = e.clientX
+            //   mousePositionY = e.clientY
+            //   console.log(e.currentTarget);
+            // }
+
+            function moveLineX(e) {
+              mousePositionX = e.clientX;
+              e.currentTarget.style.top = `${mousePositionX}px`;
+            }
+
+
+            horLines.forEach(line => {
+              line.addEventListener("click", (e) => {
+                if (e.currentTarget.id == 'horizontal-line-one') {
+                  isHorLineOneClicked = !isHorLineOneClicked
+                  if (isHorLineOneClicked) {
+                    document.addEventListener('mousemove', moveLineOneY);
+                  } else {
+                    document.removeEventListener("mousemove", moveLineOneY);
+                    document.body.style.cursor = "default";
+                  }
+                } else if (e.currentTarget.id == 'horizontal-line-two') {
+                  isHorLineTwoClicked = !isHorLineTwoClicked
+                  if (isHorLineTwoClicked) {
+                    document.addEventListener('mousemove', moveLineTwoY);
+                  } else {
+                    document.removeEventListener("mousemove", moveLineTwoY);
+                    document.body.style.cursor = "default";
+                  }
+                }
+              })
+            })
+
+            verLines.forEach(line => {
+              line.addEventListener("click", (e) => {
+                if (e.currentTarget.id == 'vertical-line-one') {
+                  isVerLineOneClicked = !isVerLineOneClicked
+                  if (isVerLineOneClicked) {
+                    mousePositionX = e.clientX
+                    e.currentTarget.style.left = `${mousePositionX}px`
+                  }
+                } else if (e.currentTarget.id == 'vertical-line-two') {
+                  isVerLineTwoClicked = !isVerLineTwoClicked
+                  if (isVerLineTwoClicked) {
+                    mousePositionX = e.clientX
+                    e.currentTarget.style.left = `${mousePositionX}px`
+                  }
+                }
+              })
+            })
+
+            function showHeight() {
+              let lineOneFromTop = horLines[0].getBoundingClientRect().top.toFixed(0)
+              let lineTwoFromTop = horLines[1].getBoundingClientRect().top.toFixed(0)
               let height = Math.abs(lineOneFromTop - lineTwoFromTop)
+              const heightIndicator = document.createElement("span")
+              // heightIndicator.style.top = 
               console.log(height);
             }
 
-            const showWidth = () => {
-              const lines = document.querySelectorAll(".ver-ruler-line")
-              let lineOneFromLeft = lines[0].getBoundingClientRect().left.toFixed(0)
-              let lineTwoFromLeft = lines[1].getBoundingClientRect().left.toFixed(0)
+            function showWidth() {
+              let lineOneFromLeft = verLines[0].getBoundingClientRect().left.toFixed(0)
+              let lineTwoFromLeft = verLines[1].getBoundingClientRect().left.toFixed(0)
               let width = Math.abs(lineOneFromLeft - lineTwoFromLeft)
+              const widthIndicator = document.createElement("span")
               console.log(width);
             }
 
