@@ -173,15 +173,14 @@ document.addEventListener("DOMContentLoaded", e => {
               e.currentTarget.getElementById('horizontal-line-two').style.top = `${mousePositionY}px`
             }
 
-            // function observeMousePosition(e) {
-            //   mousePositionX = e.clientX
-            //   mousePositionY = e.clientY
-            //   console.log(e.currentTarget);
-            // }
-
-            function moveLineX(e) {
+            function moveLineOneX(e) {
               mousePositionX = e.clientX;
-              e.currentTarget.style.top = `${mousePositionX}px`;
+              e.currentTarget.getElementById('vertical-line-one').style.left = `${mousePositionX}px`;
+            }
+
+            function moveLineTwoX(e) {
+              mousePositionX = e.clientX;
+              e.currentTarget.getElementById('vertical-line-two').style.left = `${mousePositionX}px`;
             }
 
 
@@ -212,14 +211,18 @@ document.addEventListener("DOMContentLoaded", e => {
                 if (e.currentTarget.id == 'vertical-line-one') {
                   isVerLineOneClicked = !isVerLineOneClicked
                   if (isVerLineOneClicked) {
-                    mousePositionX = e.clientX
-                    e.currentTarget.style.left = `${mousePositionX}px`
+                    document.addEventListener('mousemove', moveLineOneX);
+                  } else {
+                    document.removeEventListener("mousemove", moveLineOneX);
+                    document.body.style.cursor = "default";
                   }
                 } else if (e.currentTarget.id == 'vertical-line-two') {
                   isVerLineTwoClicked = !isVerLineTwoClicked
                   if (isVerLineTwoClicked) {
-                    mousePositionX = e.clientX
-                    e.currentTarget.style.left = `${mousePositionX}px`
+                    document.addEventListener('mousemove', moveLineTwoX);
+                  } else {
+                    document.removeEventListener("mousemove", moveLineTwoX);
+                    document.body.style.cursor = "default";
                   }
                 }
               })
