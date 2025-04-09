@@ -1,0 +1,19 @@
+{
+  "name": "chrome-extension",
+  "description": "chrome extension",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "homepage": "",
+  "devDependencies": {
+    "@types/chrome": "^0.0.313"
+  }
+}
